@@ -14,7 +14,8 @@ import { SIDEBAR_TARGETS, SidebarActionRegistry, SidebarTarget } from './sidebar
 
 /** 侧栏使用的请求名称。 */
 export const SIDEBAR_REQUESTS = {
-  open: 'sidebar.open'
+  open: 'sidebar.open',
+  downloadManualSkill: 'sidebar.downloadManualSkill'
 } as const;
 
 /**
@@ -22,7 +23,11 @@ export const SIDEBAR_REQUESTS = {
  * @param router 侧栏的请求路由器。
  * @param registry 动作注册表。
  */
-export function registerSidebarHandlers(router: MessageRouter, registry: SidebarActionRegistry): void {
+export function registerSidebarHandlers(
+  router: MessageRouter,
+  registry: SidebarActionRegistry,
+  downloadManualSkill: () => void | Promise<void>
+): void {
   router.register(SIDEBAR_REQUESTS.open, (payload) => {
     const source = readRecord(payload);
     const itemId = source.itemId;
@@ -32,6 +37,10 @@ export function registerSidebarHandlers(router: MessageRouter, registry: Sidebar
     }
 
     return { handled: registry.run(itemId, target) };
+  });
+  router.register(SIDEBAR_REQUESTS.downloadManualSkill, async () => {
+    await downloadManualSkill();
+    return { downloaded: true };
   });
 }
 

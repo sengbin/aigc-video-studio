@@ -178,3 +178,22 @@ button:focus-visible {
 .menu-action.is-pressed {
   background: var(--action-pressed-background);
 }
+
+.manual-skill-download {
+  width: 100%;
+  margin-top: 8px;
+  padding: 4px 8px;
+  color: var(--vscode-button-foreground);
+  line-height: 1.4;
+  text-align: center;
+  overflow-wrap: anywhere;
+  background: var(--vscode-button-background);
+}
+
+.manual-skill-download:hover {
+  background: var(--vscode-button-hoverBackground, var(--vscode-button-background));
+}
+
+.manual-skill-download.is-pressed {
+  background: var(--vscode-button-hoverBackground, var(--vscode-button-background));
+}

@@ -82,6 +82,9 @@ import { SIDEBAR_VIEW_ID, SidebarContent, SidebarViewProvider } from './sidebar/
 /** 数据库文件名，位于扩展的全局存储目录。 */
 const DATABASE_FILE_NAME = 'aigc-video-studio.sqlite';
 
+/** 随扩展打包的用户使用手册 Skill 压缩包文件名。 */
+const MANUAL_SKILL_ARCHIVE_NAME = 'aigc-video-studio-user-manual.zip';
+
 /** 任务完成通知上的按钮文字。 */
 const WORKBENCH_ACTION_LABEL = '打开工作台';
 
@@ -354,10 +357,26 @@ function activateWithoutDatabase(context: vscode.ExtensionContext, paths: Databa
 /** 注册侧栏视图：点击经路由器交给动作注册表。 */
 function registerSidebar(context: vscode.ExtensionContext, actionRegistry: SidebarActionRegistry, content: SidebarContent): void {
   const sidebarRouter = new MessageRouter();
-  registerSidebarHandlers(sidebarRouter, actionRegistry);
+  registerSidebarHandlers(sidebarRouter, actionRegistry, () => downloadManualSkill(context));
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(SIDEBAR_VIEW_ID, new SidebarViewProvider(context.extensionUri, sidebarRouter, content))
   );
+}
+
+/** 将扩展内的用户使用手册 Skill 压缩包复制到用户指定的位置。 */
+async function downloadManualSkill(context: vscode.ExtensionContext): Promise<void> {
+  const archiveUri = vscode.Uri.joinPath(context.extensionUri, 'resources', MANUAL_SKILL_ARCHIVE_NAME);
+  const targetUri = await vscode.window.showSaveDialog({
+    defaultUri: vscode.Uri.file(path.join(os.homedir(), MANUAL_SKILL_ARCHIVE_NAME)),
+    filters: { 'ZIP 压缩包': ['zip'] },
+    saveLabel: '下载'
+  });
+  if (targetUri === undefined) {
+    return;
+  }
+
+  await vscode.workspace.fs.copy(archiveUri, targetUri, { overwrite: true });
+  void vscode.window.showInformationMessage('用户使用手册 Skill 已下载。');
 }
 
 /**

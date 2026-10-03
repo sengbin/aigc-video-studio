@@ -11,9 +11,13 @@
 
 const PRESSED_CLASS = 'is-pressed';
 const REQUEST_OPEN = 'sidebar.open';
+/** 与宿主侧的下载请求名称保持一致。 */
+const REQUEST_DOWNLOAD_MANUAL_SKILL = 'sidebar.downloadManualSkill';
 const NOTICE_TITLE = '提示';
 const UNAVAILABLE_MESSAGE = '该功能尚未开放。';
 const GENERIC_ERROR_MESSAGE = '操作失败，请重试。';
+/** 下载请求失败且宿主未返回具体原因时使用的提示。 */
+const DOWNLOAD_ERROR_MESSAGE = '下载用户使用手册 Skill 失败，请重试。';
 
 /**
  * 通知宿主某一菜单行的按钮被点击；宿主未处理（功能尚未开放）时用页内对话框提示。
@@ -51,6 +55,18 @@ function bindPressedState(button, row, shouldPressRow) {
   button.addEventListener('lostpointercapture', clearPressed);
 }
 
+/** 请求宿主将使用手册 Skill 压缩包保存到用户选择的位置。 */
+async function downloadManualSkill() {
+  try {
+    await window.hostBridge.request(REQUEST_DOWNLOAD_MANUAL_SKILL);
+  } catch (error) {
+    await aiUi.alert({
+      title: NOTICE_TITLE,
+      message: (error && error.message) || DOWNLOAD_ERROR_MESSAGE
+    });
+  }
+}
+
 for (const row of document.querySelectorAll('.menu-row')) {
   const mainButton = row.querySelector('.menu-main');
   const actionButton = row.querySelector('.menu-action');
@@ -62,4 +78,10 @@ for (const row of document.querySelectorAll('.menu-row')) {
     bindPressedState(actionButton, row, false);
     actionButton.addEventListener('click', () => notifyClick(row, 'action'));
   }
+}
+
+const manualSkillDownloadButton = document.querySelector('.manual-skill-download');
+if (manualSkillDownloadButton) {
+  bindPressedState(manualSkillDownloadButton, manualSkillDownloadButton, false);
+  manualSkillDownloadButton.addEventListener('click', downloadManualSkill);
 }

@@ -15,10 +15,10 @@ import { SIDEBAR_REQUESTS, registerSidebarHandlers } from './sidebar-handlers';
 import { SIDEBAR_SECTIONS } from './sidebar-menu-config';
 
 /** 创建路由器和注册表的夹具。 */
-function createFixture() {
+function createFixture(downloadManualSkill: () => void | Promise<void> = () => undefined) {
   const registry = new SidebarActionRegistry(SIDEBAR_SECTIONS);
   const router = new MessageRouter();
-  registerSidebarHandlers(router, registry);
+  registerSidebarHandlers(router, registry, downloadManualSkill);
   const click = (payload: unknown) =>
     router.handle({ type: 'request', requestId: 1, name: SIDEBAR_REQUESTS.open, payload });
   return { registry, click };
@@ -57,6 +57,23 @@ test('未注册的入口返回 handled 为 false，由页面提示', async () =>
   const { click } = createFixture();
   const response = await click({ itemId: 'video-workbench', target: 'main' });
   assert.deepEqual(response?.ok && response.data, { handled: false });
+});
+
+test('点击使用手册下载请求时调用宿主下载动作', async () => {
+  let downloadCount = 0;
+  const router = new MessageRouter();
+  registerSidebarHandlers(router, new SidebarActionRegistry(SIDEBAR_SECTIONS), () => {
+    downloadCount += 1;
+  });
+
+  const response = await router.handle({
+    type: 'request',
+    requestId: 1,
+    name: SIDEBAR_REQUESTS.downloadManualSkill
+  });
+
+  assert.deepEqual(response?.ok && response.data, { downloaded: true });
+  assert.equal(downloadCount, 1);
 });
 
 test('点击参数不合法时返回校验错误', async () => {

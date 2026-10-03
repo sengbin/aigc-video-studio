@@ -22,6 +22,16 @@ test('没有提示时不渲染提示卡片', () => {
   assert.ok(!html.includes('class="notice"'));
 });
 
+test('设置卡片在菜单项下方提供使用手册 Skill 下载按钮', () => {
+  const html = createSidebarHtml({ ...BASE_OPTIONS, sections: SIDEBAR_SECTIONS });
+  const dataBackupIndex = html.indexOf('data-item-id="data-backup"');
+  const downloadButtonIndex = html.indexOf('class="manual-skill-download"');
+
+  assert.ok(dataBackupIndex >= 0);
+  assert.ok(downloadButtonIndex > dataBackupIndex);
+  assert.match(html, /aria-label="下载用户使用手册 Skill 压缩包">下载用户使用手册 Skill<\/button>/);
+});
+
 test('有提示时渲染在菜单上方，带 alert 角色，并转义 HTML', () => {
   const notice = `${DATABASE_UNAVAILABLE_NOTICE_PREFIX}无法解析 <script>alert(1)</script> & "文件"`;
   const html = createSidebarHtml({ ...BASE_OPTIONS, sections: DEGRADED_SIDEBAR_SECTIONS, notice });
@@ -45,7 +55,7 @@ test('降级菜单：点击数据备份入口由注册的动作处理，其他�
   let opened = 0;
   const registry = new SidebarActionRegistry(DEGRADED_SIDEBAR_SECTIONS).register('data-backup', 'main', () => void (opened += 1));
   const router = new MessageRouter();
-  registerSidebarHandlers(router, registry);
+  registerSidebarHandlers(router, registry, () => undefined);
   const click = (itemId: string) => router.handle({ type: 'request', requestId: 1, name: SIDEBAR_REQUESTS.open, payload: { itemId, target: 'main' } });
 
   const handled = await click('data-backup');
