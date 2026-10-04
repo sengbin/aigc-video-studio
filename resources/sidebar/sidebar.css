@@ -181,19 +181,19 @@ button:focus-visible {
 
 .manual-skill-download {
   width: 100%;
-  margin-top: 8px;
   padding: 4px 8px;
-  color: var(--vscode-button-foreground);
+  color: var(--vscode-descriptionForeground);
   line-height: 1.4;
   text-align: center;
   overflow-wrap: anywhere;
-  background: var(--vscode-button-background);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--vscode-foreground) 18%, transparent);
 }
 
 .manual-skill-download:hover {
-  background: var(--vscode-button-hoverBackground, var(--vscode-button-background));
+  background: color-mix(in srgb, var(--vscode-foreground) 6%, transparent);
 }
 
 .manual-skill-download.is-pressed {
-  background: var(--vscode-button-hoverBackground, var(--vscode-button-background));
+  background: color-mix(in srgb, var(--vscode-foreground) 10%, transparent);
 }

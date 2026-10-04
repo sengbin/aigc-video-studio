@@ -22,13 +22,19 @@ test('没有提示时不渲染提示卡片', () => {
   assert.ok(!html.includes('class="notice"'));
 });
 
-test('设置卡片在菜单项下方提供使用手册 Skill 下载按钮', () => {
+test('使用手册 Skill 下载按钮位于设置卡片外部并紧邻其下方', () => {
   const html = createSidebarHtml({ ...BASE_OPTIONS, sections: SIDEBAR_SECTIONS });
   const dataBackupIndex = html.indexOf('data-item-id="data-backup"');
+  const settingsSectionIndex = html.indexOf('aria-labelledby="section-heading-settings"');
+  const settingsCardEndIndex = html.indexOf('</section>', settingsSectionIndex);
   const downloadButtonIndex = html.indexOf('class="manual-skill-download"');
+  const downloadButtonTagStart = html.lastIndexOf('<button', downloadButtonIndex);
 
   assert.ok(dataBackupIndex >= 0);
   assert.ok(downloadButtonIndex > dataBackupIndex);
+  assert.ok(settingsCardEndIndex >= 0);
+  assert.ok(downloadButtonIndex > settingsCardEndIndex);
+  assert.equal(html.slice(settingsCardEndIndex + '</section>'.length, downloadButtonTagStart).trim(), '');
   assert.match(html, /aria-label="下载用户使用手册 Skill 压缩包">下载用户使用手册 Skill<\/button>/);
 });
 

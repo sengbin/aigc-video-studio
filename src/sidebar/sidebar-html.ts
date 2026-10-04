@@ -31,7 +31,12 @@ export interface SidebarHtmlOptions {
 export function createSidebarHtml(options: SidebarHtmlOptions): string {
   const nonce = createNonce();
   const noticeHtml = options.notice === undefined ? [] : [renderNotice(options.notice)];
-  const sectionsHtml = [...noticeHtml, ...options.sections.map(renderSection)].join('\n');
+  const sectionsHtml = [
+    ...noticeHtml,
+    ...options.sections.flatMap((section) => section.id === 'settings'
+      ? [renderSection(section), renderManualSkillDownloadButton()]
+      : [renderSection(section)])
+  ].join('\n');
   const styleTags = options.styleUris.map((uri) => `  <link rel="stylesheet" href="${escapeHtml(uri)}">`).join('\n');
   const scriptTags = options.scriptUris
     .map((uri) => `  <script nonce="${nonce}" src="${escapeHtml(uri)}"></script>`)
@@ -66,18 +71,19 @@ function renderNotice(notice: string): string {
 function renderSection(section: SidebarMenuSection): string {
   const headingId = `section-heading-${section.id}`;
   const rows = section.items.map(renderItem).join('\n');
-  const manualSkillDownloadButton = section.id === 'settings'
-    ? `\n        <button class="manual-skill-download" type="button" aria-label="下载用户使用手册 Skill 压缩包">下载用户使用手册 Skill</button>`
-    : '';
   return `    <section class="card" aria-labelledby="${headingId}">
       <div class="card-inner card-${section.surface}">
         <h2 id="${headingId}">${escapeHtml(section.title)}</h2>
         <nav aria-label="${escapeHtml(section.title)}">
 ${rows}
         </nav>
-${manualSkillDownloadButton}
       </div>
     </section>`;
+}
+
+/** 在设置卡片下方渲染手册下载按钮。 */
+function renderManualSkillDownloadButton(): string {
+  return '    <button class="manual-skill-download" type="button" aria-label="下载用户使用手册 Skill 压缩包">下载用户使用手册 Skill</button>';
 }
 
 /** 渲染一个菜单行：主入口按钮（可带小标签），以及可选的尾部操作按钮。 */

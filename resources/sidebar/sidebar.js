@@ -34,25 +34,27 @@ async function notifyClick(row, target) {
 }
 
 /**
- * 为按钮绑定按下状态：按下时捕获指针，在松开、取消或丢失捕获时清除。
+ * 为按钮绑定按下状态；不捕获指针，松开或取消时由窗口级事件清除状态。
  * @param {HTMLButtonElement} button 需要绑定的按钮。
  * @param {HTMLElement} row 按钮所在的菜单行。
  * @param {boolean} shouldPressRow 按下时是否同时高亮整行。
  */
 function bindPressedState(button, row, shouldPressRow) {
-  const clearPressed = () => {
+  let activePointerId;
+  const clearPressed = (event) => {
+    if (event.pointerId !== activePointerId) return;
+    activePointerId = undefined;
     if (shouldPressRow) row.classList.remove(PRESSED_CLASS);
     button.classList.remove(PRESSED_CLASS);
   };
   button.addEventListener('pointerdown', (event) => {
     if (event.button !== 0) return;
+    activePointerId = event.pointerId;
     if (shouldPressRow) row.classList.add(PRESSED_CLASS);
     button.classList.add(PRESSED_CLASS);
-    button.setPointerCapture(event.pointerId);
   });
-  button.addEventListener('pointerup', clearPressed);
-  button.addEventListener('pointercancel', clearPressed);
-  button.addEventListener('lostpointercapture', clearPressed);
+  window.addEventListener('pointerup', clearPressed);
+  window.addEventListener('pointercancel', clearPressed);
 }
 
 /** 请求宿主将使用手册 Skill 压缩包保存到用户选择的位置。 */
